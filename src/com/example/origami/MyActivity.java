@@ -3,13 +3,17 @@ package com.example.origami;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 public class MyActivity extends Activity {
 
     private RelativeLayout targetLayout;
+
+    private OrigamiView origamiView;
 
     /**
      * Called when the activity is first created.
@@ -24,7 +28,7 @@ public class MyActivity extends Activity {
         /**
          * 创建折纸视图
          */
-        OrigamiView origamiView = new OrigamiView(this, 150, 300);
+        origamiView = new OrigamiView(this, 150, 300);
         origamiView.setBackgroundColor(Color.GRAY);
 
         OrigamiItem item=new OrigamiItem();
@@ -46,9 +50,14 @@ public class MyActivity extends Activity {
         head.setBackgroundColor(Color.GREEN);
         item.setHead(head);
 
-        content=new View(this);
+        //模拟复杂的自定义界面
+        FrameLayout contentLayout=new FrameLayout(this);
+        this.getLayoutInflater().inflate(R.layout.content,contentLayout);
+
+        content=contentLayout;
         content.setBackgroundColor(Color.MAGENTA);
         item.setContent(content);
+
 
         origamiView.addOrigamiItem(item);
 
@@ -57,5 +66,12 @@ public class MyActivity extends Activity {
                 new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 600);
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         this.targetLayout.addView(origamiView, layoutParams);
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }

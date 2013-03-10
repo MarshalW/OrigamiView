@@ -1,12 +1,18 @@
 package com.example.origami;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +42,21 @@ public class OrigamiView extends LinearLayout {
         this.blankView = new View(getContext());
         LinearLayout.LayoutParams layoutParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, contentHeight);
         this.addView(blankView, layoutParams);
+
+        //在第一次布局后执行，获取当时布局的宽度，并截取视图的bitmap
+        this.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                //TODO 如果没能执行这步怎么办，比如竖屏后马上横屏，是否会有问题
+                OrigamiView.this.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                int width=OrigamiView.this.getWidth();
+
+                for(OrigamiItem item:origamiItems){
+                    item.drawBitmaps(width);
+                }
+            }
+        });
     }
 
     public List<OrigamiItem> getOrigamiItems() {
