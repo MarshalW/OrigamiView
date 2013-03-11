@@ -29,32 +29,36 @@ public class MyActivity extends Activity {
          * 创建折纸视图
          */
         origamiView = new OrigamiView(this, 150, 300);
-        origamiView.setBackgroundColor(Color.GRAY);
+        origamiView.setBackgroundColor(Color.LTGRAY);
 
-        OrigamiItem item=new OrigamiItem();
+        OrigamiItem item = new OrigamiItem();
 
         //第1个item
-        View head=new View(this);
+//        View head = new View(this);
+
+        View head = this.getLayoutInflater().inflate(R.layout.head0, null);
         head.setBackgroundColor(Color.GREEN);
         item.setHead(head);
 
-        View content=new View(this);
+        View content = new View(this);
         content.setBackgroundColor(Color.YELLOW);
         item.setContent(content);
 
         origamiView.addOrigamiItem(item);
 
         //第2个item
-        item=new OrigamiItem();
-        head=new View(this);
-        head.setBackgroundColor(Color.GREEN);
+        item = new OrigamiItem();
+
+        head = this.getLayoutInflater().inflate(R.layout.head, null);
+
+        head.setBackgroundColor(Color.RED);
         item.setHead(head);
 
         //模拟复杂的自定义界面
-        FrameLayout contentLayout=new FrameLayout(this);
-        this.getLayoutInflater().inflate(R.layout.content,contentLayout);
+        FrameLayout contentLayout = new FrameLayout(this);
+        this.getLayoutInflater().inflate(R.layout.content, contentLayout);
 
-        content=contentLayout;
+        content = contentLayout;
         content.setBackgroundColor(Color.MAGENTA);
         item.setContent(content);
 
@@ -64,10 +68,9 @@ public class MyActivity extends Activity {
         //将origami view加入到根布局中
         RelativeLayout.LayoutParams layoutParams =
                 new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 600);
+        //TODO 600是手工计算的，要改为自动得到的
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         this.targetLayout.addView(origamiView, layoutParams);
-
-
     }
 
     @Override
