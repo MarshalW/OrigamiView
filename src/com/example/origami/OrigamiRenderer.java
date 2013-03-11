@@ -8,6 +8,7 @@ import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -17,6 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,6 +45,8 @@ public class OrigamiRenderer implements GLSurfaceView.Renderer {
     private FloatBuffer headVertexBuffer, textureCoordBuffer;
 
     private Shader headShader;
+
+    private float factor;
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
@@ -72,7 +76,9 @@ public class OrigamiRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    public void chooseItem(OrigamiView view) {
+    public void chooseItem(OrigamiView view, int oldChooseIndex) {
+//        view.getTargetLayout().setVisibility(View.INVISIBLE);
+
         this.origamiView = view;
         this.setDrawData();
         view.getOrigamiAnimationView().requestRender();
@@ -108,6 +114,33 @@ public class OrigamiRenderer implements GLSurfaceView.Renderer {
 
     }
 
+    private void setHeadVertexesData() {
+        //实现最简单的倒排序，给内容留出空间
+        List<float[]> _vertexes = new ArrayList<float[]>();
+        float currentTop = -1;
+        for (int i = 0; i < origamiView.getOrigamiItems().size(); i++) {
+            Log.d("origami","choose index: "+origamiView.getChooseIndex());
+            if (origamiView.getChooseIndex() == origamiView.getOrigamiItems().size() - 1 - i) {
+                currentTop += contentHeight;
+                Log.d("origami","current top: "+currentTop);
+            }
+            currentTop += headHeight;
+
+            float[] vertexes = new float[]{
+                    -ratio, currentTop, 0,
+                    -ratio, currentTop - headHeight, 0,
+                    ratio, currentTop, 0,
+                    ratio, currentTop - headHeight, 0
+            };
+            _vertexes.add(vertexes);
+        }
+        Collections.reverse(_vertexes);
+
+        for(float[] v:_vertexes){
+            headVertexBuffer.put(v);
+        }
+    }
+
     /**
      * 设置数据，用于后续的绘制
      */
@@ -137,17 +170,7 @@ public class OrigamiRenderer implements GLSurfaceView.Renderer {
             headVertexBuffer.clear();
         }
 
-        for (int i = 0; i < origamiView.getOrigamiItems().size(); i++) {
-            float top = -1 + (origamiView.getOrigamiItems().size() - i) * headHeight;
-            float bottom = top - headHeight;
-            float[] vertexes = new float[]{
-                    -ratio, top, 0,
-                    -ratio, bottom, 0,
-                    ratio, top, 0,
-                    ratio, bottom, 0
-            };
-            headVertexBuffer.put(vertexes);
-        }
+        this.setHeadVertexesData();
 
         headVertexBuffer.position(0);
         textureCoordBuffer.position(0);

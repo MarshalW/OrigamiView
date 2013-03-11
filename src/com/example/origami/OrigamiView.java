@@ -137,12 +137,15 @@ public class OrigamiView extends FrameLayout {
                 }
 
                 int _chooseIndex = origamiItems.indexOf(chooseItem);
+                int oldChooseIndex=chooseIndex;
+
                 if (_chooseIndex != chooseIndex) {
                     chooseIndex = _chooseIndex;
                 } else {
                     chooseIndex = -1;
                 }
-                renderer.chooseItem(OrigamiView.this);
+
+                renderer.chooseItem(OrigamiView.this, oldChooseIndex);
             }
         });
 
