@@ -29,7 +29,7 @@ public class MyActivity extends Activity {
          * 创建折纸视图
          */
         origamiView = new OrigamiView(this, 150, 300);
-        origamiView.setBackgroundColor(Color.LTGRAY);
+        origamiView.setBackgroundColor(Color.TRANSPARENT);
 
         OrigamiItem item = new OrigamiItem();
 
@@ -37,11 +37,11 @@ public class MyActivity extends Activity {
 //        View head = new View(this);
 
         View head = this.getLayoutInflater().inflate(R.layout.head0, null);
-        head.setBackgroundColor(Color.GREEN);
+        head.setBackgroundColor(Color.DKGRAY);
         item.setHead(head);
 
         View content = new View(this);
-        content.setBackgroundColor(Color.YELLOW);
+        content.setBackgroundColor(Color.TRANSPARENT);
         item.setContent(content);
 
         origamiView.addOrigamiItem(item);
@@ -51,7 +51,7 @@ public class MyActivity extends Activity {
 
         head = this.getLayoutInflater().inflate(R.layout.head, null);
 
-        head.setBackgroundColor(Color.RED);
+        head.setBackgroundColor(Color.DKGRAY);
         item.setHead(head);
 
         //模拟复杂的自定义界面
@@ -59,7 +59,7 @@ public class MyActivity extends Activity {
         this.getLayoutInflater().inflate(R.layout.content, contentLayout);
 
         content = contentLayout;
-        content.setBackgroundColor(Color.MAGENTA);
+        content.setBackgroundColor(Color.TRANSPARENT);
         item.setContent(content);
 
 

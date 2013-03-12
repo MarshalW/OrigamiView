@@ -1,5 +1,7 @@
 package com.example.origami;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
@@ -7,8 +9,11 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -48,6 +53,24 @@ public class OrigamiRenderer implements GLSurfaceView.Renderer {
 
     private float factor;
 
+    private int oldChooseIndex;
+
+    private boolean canDraw;
+
+    private Handler handler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            if(msg.what==10){
+                origamiView.getTargetLayout().setVisibility(View.INVISIBLE);
+                origamiView.setCurrentVisible();
+                return;
+            }
+//            origamiView.getOrigamiAnimationView().setVisibility(View.INVISIBLE);
+            canDraw=false;
+            origamiView.getOrigamiAnimationView().requestRender();
+        }
+    };
+
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         GLES20.glClearColor(0f, 0f, 0f, 0.0f);
@@ -71,17 +94,102 @@ public class OrigamiRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl10) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        if (this.headVertexBuffer != null) {
+        if (canDraw) {
             this.draw();
         }
     }
 
-    public void chooseItem(OrigamiView view, int oldChooseIndex) {
-//        view.getTargetLayout().setVisibility(View.INVISIBLE);
-
+    public void chooseItem(final OrigamiView view, int oldChooseIndex) {
         this.origamiView = view;
-        this.setDrawData();
-        view.getOrigamiAnimationView().requestRender();
+
+        if (oldChooseIndex == -1) {
+            ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
+            valueAnimator.setDuration(300);
+            valueAnimator.setInterpolator(new DecelerateInterpolator());
+            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    factor = (Float) valueAnimator.getAnimatedValue();
+
+                    setDrawData();
+                    view.getOrigamiAnimationView().requestRender();
+                }
+            });
+            valueAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+//                    origamiView.getOrigamiAnimationView().setVisibility(View.VISIBLE);
+                    canDraw=true;
+                    origamiView.getOrigamiAnimationView().requestRender();
+
+//                    origamiView.getTargetLayout().setVisibility(View.INVISIBLE);
+                    Message message=Message.obtain();
+                    message.what=10;
+                    handler.sendMessageDelayed(message,0);
+                }
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    origamiView.getTargetLayout().setVisibility(View.VISIBLE);
+//                    origamiView.getOrigamiAnimationView().setVisibility(View.INVISIBLE);
+                    handler.sendMessageDelayed(new Message(),0);
+                }
+                @Override
+                public void onAnimationCancel(Animator animator) {
+                    origamiView.getTargetLayout().setVisibility(View.VISIBLE);
+//                    origamiView.getOrigamiAnimationView().setVisibility(View.INVISIBLE);
+                    handler.sendMessageDelayed(new Message(),0);
+                }
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            valueAnimator.start();
+        }else{
+            this.oldChooseIndex=oldChooseIndex;
+            ValueAnimator valueAnimator = ValueAnimator.ofFloat(-1, 1);
+            valueAnimator.setDuration(500);
+            valueAnimator.setInterpolator(new DecelerateInterpolator());
+            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    factor = (Float) valueAnimator.getAnimatedValue();
+
+                    setDrawData();
+                    view.getOrigamiAnimationView().requestRender();
+                }
+            });
+            valueAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+//                    origamiView.getOrigamiAnimationView().setVisibility(View.VISIBLE);
+                    canDraw=true;
+                    origamiView.getOrigamiAnimationView().requestRender();
+
+//                    origamiView.getTargetLayout().setVisibility(View.INVISIBLE);
+                    Message message=Message.obtain();
+                    message.what=10;
+                    handler.sendMessageDelayed(message,0);
+                }
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    origamiView.getTargetLayout().setVisibility(View.VISIBLE);
+//                    origamiView.getOrigamiAnimationView().setVisibility(View.INVISIBLE);
+                    handler.sendMessageDelayed(new Message(),0);
+                }
+                @Override
+                public void onAnimationCancel(Animator animator) {
+                    origamiView.getTargetLayout().setVisibility(View.VISIBLE);
+//                    origamiView.getOrigamiAnimationView().setVisibility(View.INVISIBLE);
+                    handler.sendMessageDelayed(new Message(),0);
+                }
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            valueAnimator.start();
+        }
     }
 
     private void initShader() {
@@ -115,14 +223,20 @@ public class OrigamiRenderer implements GLSurfaceView.Renderer {
     }
 
     private void setHeadVertexesData() {
+        int chooseIndex= origamiView.getChooseIndex();
+
+        if(factor<0){
+            chooseIndex=this.oldChooseIndex;
+        }
+
         //实现最简单的倒排序，给内容留出空间
         List<float[]> _vertexes = new ArrayList<float[]>();
         float currentTop = -1;
         for (int i = 0; i < origamiView.getOrigamiItems().size(); i++) {
-            Log.d("origami","choose index: "+origamiView.getChooseIndex());
-            if (origamiView.getChooseIndex() == origamiView.getOrigamiItems().size() - 1 - i) {
-                currentTop += contentHeight;
-                Log.d("origami","current top: "+currentTop);
+//            Log.d("origami", "choose index: " + chooseIndex);
+            if (chooseIndex == origamiView.getOrigamiItems().size() - 1 - i) {
+                currentTop += contentHeight*Math.abs(factor);
+//                Log.d("origami", "current top: " + currentTop);
             }
             currentTop += headHeight;
 
@@ -136,9 +250,11 @@ public class OrigamiRenderer implements GLSurfaceView.Renderer {
         }
         Collections.reverse(_vertexes);
 
-        for(float[] v:_vertexes){
+        for (float[] v : _vertexes) {
             headVertexBuffer.put(v);
         }
+
+        Log.d("origami","current top>>>>"+_vertexes.get(0)[1]);
     }
 
     /**

@@ -109,6 +109,33 @@ public class OrigamiView extends FrameLayout {
         return origamiItems;
     }
 
+    public void setCurrentVisible() {
+//        for (int i = 0; i < origamiItems.size(); i++) {
+//            OrigamiItem item= origamiItems.get(i);
+//            if (chooseIndex != i) {
+//                item.getContent().setVisibility(View.GONE);
+//            } else {
+//                if (item.getContent().getVisibility() == View.VISIBLE) {
+//                    item.getContent().setVisibility(View.GONE);
+//                    blankView.setVisibility(View.VISIBLE);
+//                } else {
+//                    item.getContent().setVisibility(View.VISIBLE);
+//                }
+//            }
+//        }
+
+        for(OrigamiItem item:origamiItems){
+            item.getContent().setVisibility(View.GONE);
+        }
+
+        if(chooseIndex==-1){
+            blankView.setVisibility(View.VISIBLE);
+        }else {
+            blankView.setVisibility(View.GONE);
+            origamiItems.get(chooseIndex).getContent().setVisibility(View.VISIBLE);
+        }
+    }
+
     public void addOrigamiItem(final OrigamiItem item) {
         this.origamiItems.add(item);
 
@@ -119,25 +146,28 @@ public class OrigamiView extends FrameLayout {
         item.getHead().setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                targetLayout.setVisibility(View.INVISIBLE);
                 blankView.setVisibility(View.GONE);
                 OrigamiItem chooseItem = null;
 
                 for (OrigamiItem i : origamiItems) {
                     if (i != item) {
-                        i.getContent().setVisibility(View.GONE);
+//                        i.getContent().setVisibility(View.GONE);
                     } else {
                         chooseItem = i;
-                        if (i.getContent().getVisibility() == View.VISIBLE) {
-                            i.getContent().setVisibility(View.GONE);
-                            blankView.setVisibility(View.VISIBLE);
-                        } else {
-                            i.getContent().setVisibility(View.VISIBLE);
-                        }
+//                        if (i.getContent().getVisibility() == View.VISIBLE) {
+//                            i.getContent().setVisibility(View.GONE);
+//                            blankView.setVisibility(View.VISIBLE);
+//                        } else {
+//                            i.getContent().setVisibility(View.VISIBLE);
+//                        }
                     }
                 }
 
+                //TODO 闪屏的问题出在这里
+
                 int _chooseIndex = origamiItems.indexOf(chooseItem);
-                int oldChooseIndex=chooseIndex;
+                int oldChooseIndex = chooseIndex;
 
                 if (_chooseIndex != chooseIndex) {
                     chooseIndex = _chooseIndex;
